@@ -1,0 +1,19 @@
+{
+  "name": "explorador-turistico",
+  "version": "1.0.0",
+  "description": "Explorador turistico - TripAdvisor",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrianCeb/ProyectoFinal-JS-CebreroBrian.git"
+  },
+  "author": "Brian Cebrero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrianCeb/ProyectoFinal-JS-CebreroBrian/issues"
+  },
+  "homepage": "https://github.com/BrianCeb/ProyectoFinal-JS-CebreroBrian#readme"
+}

@@ -1,35 +1,61 @@
+let map;
+
 document.addEventListener("DOMContentLoaded", () => {
     const mapElement = document.getElementById("map");
     if (mapElement) {
-        const map = L.map('map').setView([20, 0], 5);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     } else {
-        console.error("Elemento con ID 'map' no encontrado");
+        console.error("Elemento 'map' no encontrado");
     }
 });
 
+const CORS_PROXY = 'https://api.allorigins.win/get?url=';
 const API_KEY = '93CF9D486732457BB97677D768A7AE07';
 const API_URL = 'https://api.content.tripadvisor.com/api/v1/location/search';
+let markers = [];
 
 async function buscarLugares() {
     const query = document.getElementById("search").value.trim();
     if (!query) {
-        alert("Por favor, ingresa una ciudad o país.");
+        alert("Por favor, ingresar una ciudad o país.");
         return;
     }
     
     try {
-        const response = await fetch(`${API_URL}?searchQuery=${encodeURIComponent(query)}&category=attractions&language=es`, {
-            headers: { 'accept': 'application/json', 'X-TripAdvisor-API-Key': API_KEY }
-        });
+        const geocodeResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const geocodeData = await geocodeResponse.json();
         
-        if (!response.ok) throw new Error("Error en la solicitud a la API");
-        const data = await response.json();
-        mostrarResultados(data);
+        if (geocodeData && geocodeData.length > 0) {
+            const lat = parseFloat(geocodeData[0].lat);
+            const lon = parseFloat(geocodeData[0].lon);
+            
+            map.setView([lat, lon], 13);
+
+            limpiarMarcadores();
+
+            L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup(`<b>${query}</b>`);
+            
+            const targetUrl = `${API_URL}?key=${API_KEY}&searchQuery=${encodeURIComponent(query)}&category=attractions&language=es`;
+            
+            const proxyUrl = `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
+            const response = await fetch(proxyUrl);
+            
+            if (!response.ok) throw new Error("Error en la solicitud a la API");
+            
+            const result = await response.json();
+            const data = JSON.parse(result.contents);
+            console.log('Resultados de la búsqueda:', data);
+            mostrarResultados(data, lat, lon);
+        } else {
+            throw new Error("No se encontró la ubicación");
+        }
     } catch (error) {
-        console.error("Error al obtener los datos de TripAdvisor:", error);
+        console.error("Error:", error);
+        document.getElementById("explore-results").innerHTML = 
+            `<p>Error: ${error.message}. Por favor, intenta más tarde.</p>`;
     }
 }
 
@@ -42,26 +68,51 @@ async function buscarCategoria() {
     }
     
     try {
-        const response = await fetch(`${API_URL}?searchQuery=${encodeURIComponent(query)}&category=${categoria}&language=es`, {
-            headers: { 'accept': 'application/json', 'X-TripAdvisor-API-Key': API_KEY }
-        });
+        const geocodeResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const geocodeData = await geocodeResponse.json();
         
-        if (!response.ok) throw new Error("Error en la solicitud a la API");
-        const data = await response.json();
-        mostrarResultados(data);
+        if (geocodeData && geocodeData.length > 0) {
+            const lat = parseFloat(geocodeData[0].lat);
+            const lon = parseFloat(geocodeData[0].lon);
+            
+            const targetUrl = `${API_URL}?key=${API_KEY}&searchQuery=${encodeURIComponent(query)}&category=${categoria}&language=es`;
+            const proxyUrl = `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
+            const response = await fetch(proxyUrl);
+            
+            if (!response.ok) throw new Error("Error en la solicitud a la API");
+            
+            const result = await response.json();
+            const data = JSON.parse(result.contents);
+            console.log('Resultados por categoría:', data);
+            mostrarResultados(data, lat, lon);
+        }
     } catch (error) {
-        console.error("Error al obtener los datos de TripAdvisor:", error);
+        console.error("Error:", error);
+        document.getElementById("explore-results").innerHTML = 
+            `<p>Error: ${error.message}. Por favor, intenta más tarde.</p>`;
     }
+}
+
+function limpiarMarcadores() {
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
 }
 
 function mostrarResultados(data) {
     const resultsContainer = document.getElementById("explore-results");
     resultsContainer.innerHTML = "";
     
+    limpiarMarcadores();
+    
     if (data.data && Array.isArray(data.data) && data.data.length > 0) {
         data.data.forEach(lugar => {
             const placeElement = document.createElement("div");
-            placeElement.innerHTML = `<h3>${lugar.name}</h3><p>${lugar.address_obj ? lugar.address_obj.address_string : 'Sin dirección disponible'}</p>`;
+            placeElement.className = 'place-item';
+            placeElement.innerHTML = `
+                <h3>${lugar.name}</h3>
+                <p>${lugar.address_obj ? lugar.address_obj.address_string : 'Sin dirección disponible'}</p>
+                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lugar.address_obj ? lugar.address_obj.address_string : '')}" target="_blank">Ver en Google Maps</a>
+            `;
             resultsContainer.appendChild(placeElement);
         });
     } else {

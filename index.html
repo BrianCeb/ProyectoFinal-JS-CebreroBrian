@@ -12,23 +12,28 @@
         <h1>Explorador de Lugares Turísticos</h1>
         <input type="text" id="search" placeholder="Ingresa una ciudad o país">
         <button onclick="buscarLugares()">Buscar</button>
+        
         <div id="map"></div>
         <ul id="places-list"></ul>
     </div>
     
-    <div class="container" id="explore">
-        <h2>Explorar</h2>
-        <label for="category">Selecciona una categoría:</label>
+    <div class="container-categorias" id="explore">
+        <h2>Categorias</h2>
+        <label for="category"></label>
         <select id="category">
+            <div class="values">
             <option value="tourist">Puntos Turísticos</option>
             <option value="hotels">Hoteles</option>
             <option value="restaurants">Restaurantes</option>
+        </div>
         </select>
         <button onclick="buscarCategoria()">Buscar</button>
         <div id="explore-results"></div>
     </div>
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="main.js"></script>
+    
 </body>
 </html>

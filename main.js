@@ -18,7 +18,11 @@ let markers = [];
 async function buscarLugares() {
     const query = document.getElementById("search").value.trim();
     if (!query) {
-        alert("Por favor, ingresar una ciudad o país.");
+        Swal.fire({
+            icon: "warning",
+            title: "Por favor",
+            text: "Ingresar una ciudad o país",
+        });
         return;
     }
     
@@ -31,9 +35,8 @@ async function buscarLugares() {
             const lon = parseFloat(geocodeData[0].lon);
             
             map.setView([lat, lon], 13);
-
             limpiarMarcadores();
-
+            
             L.marker([lat, lon])
                 .addTo(map)
                 .bindPopup(`<b>${query}</b>`);
@@ -48,6 +51,9 @@ async function buscarLugares() {
             const result = await response.json();
             const data = JSON.parse(result.contents);
             console.log('Resultados de la búsqueda:', data);
+
+            localStorage.setItem('resultadosBusqueda', JSON.stringify(data));
+            
             mostrarResultados(data, lat, lon);
         } else {
             throw new Error("No se encontró la ubicación");
@@ -63,7 +69,11 @@ async function buscarCategoria() {
     const categoria = document.getElementById("category").value;
     const query = document.getElementById("search").value.trim();
     if (!query) {
-        alert("Por favor, ingresa una ciudad o país.");
+        Swal.fire({
+            icon: "warning",
+            title: "Por favor",
+            text: "Ingresar una ciudad o país",
+        });
         return;
     }
     
@@ -84,6 +94,9 @@ async function buscarCategoria() {
             const result = await response.json();
             const data = JSON.parse(result.contents);
             console.log('Resultados por categoría:', data);
+            
+            localStorage.setItem('resultadosBusqueda', JSON.stringify(data));
+            
             mostrarResultados(data, lat, lon);
         }
     } catch (error) {

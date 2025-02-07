@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Lugares Turísticos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#home">Inicio</a></li>
+            <li><a href="#explore">Explorar</a></li>
+            <li><a href="#contact">Contacto</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container" id="home">
+        <h1>Explorador de Lugares Turísticos</h1>
+        <input type="text" id="search" placeholder="Ingresa una ciudad o país">
+        <button onclick="buscarLugares()">Buscar</button>
+        <div id="map"></div>
+        <ul id="places-list"></ul>
+    </div>
+    
+    <div class="container" id="explore">
+        <h2>Explorar</h2>
+        <label for="category">Selecciona una categoría:</label>
+        <select id="category">
+            <option value="tourist">Puntos Turísticos</option>
+            <option value="hotels">Hoteles</option>
+            <option value="restaurants">Restaurantes</option>
+        </select>
+        <button onclick="buscarCategoria()">Buscar</button>
+        <div id="explore-results"></div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
